@@ -57,13 +57,20 @@ def plot_counts(groupby):
         )
         cursor = conn.cursor()
 
-        # Only allow columns that exist in the mock table.
-        allowed_columns = ["id", "group", "last_name", "email", "gender", "ip_address"]
-        if groupby not in allowed_columns:
+        # Use predefined queries so column names are not inserted into SQL directly.
+        queries = {
+            "id": "SELECT id, COUNT(*) FROM mock GROUP BY id",
+            "group": "SELECT `group`, COUNT(*) FROM mock GROUP BY `group`",
+            "last_name": "SELECT last_name, COUNT(*) FROM mock GROUP BY last_name",
+            "email": "SELECT email, COUNT(*) FROM mock GROUP BY email",
+            "gender": "SELECT gender, COUNT(*) FROM mock GROUP BY gender",
+            "ip_address": "SELECT ip_address, COUNT(*) FROM mock GROUP BY ip_address"
+        }
+
+        if groupby not in queries:
             raise ValueError("Invalid column name")
 
-        query = f"SELECT `{groupby}`, COUNT(*) FROM mock GROUP BY `{groupby}`"
-        cursor.execute(query)
+        cursor.execute(queries[groupby])
 
         results = cursor.fetchall()
         logging.info("Counts retrieved successfully")

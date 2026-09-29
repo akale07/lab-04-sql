@@ -44,8 +44,9 @@ def load_data(data, table):
         )
         cursor = conn.cursor()
 
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS {table} (
+        # Create the mock table if it does not already exist.
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS mock (
                 id BIGINT PRIMARY KEY,
                 `group` VARCHAR(255),
                 last_name VARCHAR(255),
@@ -55,12 +56,13 @@ def load_data(data, table):
             )
         """)
 
-        query = f"""
-            INSERT INTO {table}
+        # Use placeholders for the values being inserted.
+        query = """
+            INSERT INTO mock
             VALUES (%s, %s, %s, %s, %s, %s)
         """
 
-# Insert each row into the database.
+        # Insert each row into the database.
         for _, row in data.iterrows():
             cursor.execute(query, tuple(row))
 
@@ -78,9 +80,11 @@ def load_data(data, table):
 
 def main():
     """Run the data processing and upload workflow."""
+    logging.info("Starting data processing")
     data = read_data("MOCK_DATA.csv")
     data = clean_data(data)
     load_data(data, "mock")
+    logging.info("Data processing complete")
 
 
 if __name__ == "__main__":
